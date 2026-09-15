@@ -42,4 +42,11 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Safety net: log (rather than silently crash on) any promise rejection
+// that slips past asyncHandler, so Render logs show the real cause
+// instead of the service just going down with a 502.
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+});

@@ -3,8 +3,9 @@ const router = express.Router();
 const { getArtist, updateArtist } = require('../controllers/artistController');
 const { protectAdmin } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
+const asyncHandler = require('../middleware/asyncHandler');
 
-router.get('/', getArtist);
-router.put('/', protectAdmin, upload.single('image'), updateArtist);
+router.get('/', asyncHandler(getArtist));
+router.put('/', protectAdmin, upload.single('image'), asyncHandler(updateArtist));
 
 module.exports = router;
