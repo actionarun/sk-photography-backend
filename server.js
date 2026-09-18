@@ -32,6 +32,27 @@ app.use(
 
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'API is running' }));
 
+// TEMPORARY diagnostic route: pings Cloudinary's Admin API using the
+// configured credentials, so we can confirm whether CLOUDINARY_CLOUD_NAME /
+// API_KEY / API_SECRET on Render are actually valid, without needing shell
+// access (not available on Render's free plan). Remove this route once the
+// Cloudinary upload issue is resolved — it should not stay in production.
+app.get('/api/debug/cloudinary-ping', async (req, res) => {
+  const cloudinary = require('./config/cloudinary');
+  try {
+    const result = await cloudinary.api.ping();
+    res.json({ success: true, result, cloud_name: cloudinary.config().cloud_name });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      http_code: err.http_code,
+      name: err.name,
+      cloud_name: cloudinary.config().cloud_name,
+    });
+  }
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/enquiries', enquiryRoutes);
@@ -58,6 +79,3 @@ const server = app.listen(PORT, () => console.log(`Server running on port ${PORT
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Rejection:', err);
 });
-
-
-
