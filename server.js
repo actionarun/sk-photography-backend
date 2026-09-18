@@ -53,6 +53,32 @@ app.get('/api/debug/cloudinary-ping', async (req, res) => {
   }
 });
 
+// TEMPORARY: tests an actual signed upload (a 1x1 pixel PNG, embedded as a
+// data URI so no file needs to be sent) using the Upload API — as opposed
+// to /api/debug/cloudinary-ping which only tests the Admin API. If ping
+// succeeds but this fails, the credentials are valid but lack upload
+// permission (a restricted/scoped API key) or something else is specific
+// to the Upload API. Remove both debug routes once resolved.
+app.get('/api/debug/cloudinary-upload-test', async (req, res) => {
+  const cloudinary = require('./config/cloudinary');
+  const onePixelPng =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+  try {
+    const result = await cloudinary.uploader.upload(onePixelPng, {
+      folder: 'stuart-photography/debug-test',
+    });
+    res.json({ success: true, url: result.secure_url, public_id: result.public_id });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      http_code: err.http_code,
+      name: err.name,
+      cloud_name: cloudinary.config().cloud_name,
+    });
+  }
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/enquiries', enquiryRoutes);
