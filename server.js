@@ -41,6 +41,14 @@ app.use('/api/studio', studioRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
+// Startup visibility: confirms which Cloudinary vars actually reached the
+// running service (never logs the secret itself).
+console.log('Cloudinary config check:', {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'MISSING',
+  api_key_present: Boolean(process.env.CLOUDINARY_API_KEY),
+  api_secret_present: Boolean(process.env.CLOUDINARY_API_SECRET),
+});
+
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
@@ -50,3 +58,6 @@ const server = app.listen(PORT, () => console.log(`Server running on port ${PORT
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Rejection:', err);
 });
+
+
+
